@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carteirinha SENAI - Painel Administrativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="barra-navegacao" role="navigation">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-nav" aria-label="Logo Carteirinha SENAI">
+        <i class="fas fa-graduation-cap"></i>
+        <span>SENAI</span>
+      </a>
+
+      <button class="botao-menu-hamburger" id="btn-menu" aria-label="Abrir menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="perfil.html"><i class="fas fa-user-circle"></i> Perfil</a></li>
+        <li><a href="scanner.html"><i class="fas fa-qrcode"></i> Scanner</a></li>
+        <li><a href="notificacoes.html"><i class="fas fa-bell"></i> Notificações</a></li>
+        <li><a href="admin.html" class="ativo"><i class="fas fa-cog"></i> Admin</a></li>
+        <li><a href="#" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="conteudo-principal">
+    <section class="secao-admin">
+      <h2>Painel Administrativo</h2>
+      <p>Gerenciar alunos, gestores e estatísticas</p>
+
+      <div class="abas-admin">
+        <button class="aba-btn ativo" data-aba="alunos"><i class="fas fa-users"></i> Alunos</button>
+        <button class="aba-btn" data-aba="gestores"><i class="fas fa-user-tie"></i> Gestores</button>
+        <button class="aba-btn" data-aba="estatisticas"><i class="fas fa-chart-bar"></i> Estatísticas</button>
+      </div>
+
+      <div id="aba-alunos" class="conteudo-aba ativo">
+        <div class="toolbar-admin">
+          <input type="text" id="busca-alunos" placeholder="Buscar aluno..." class="campo-busca">
+          <button id="btn-novo-aluno" class="botao-primario">
+            <i class="fas fa-plus"></i> Novo Aluno
+          </button>
+        </div>
+        <table class="tabela-admin">
+          <thead>
+            <tr>
+              <th>RA</th>
+              <th>Nome</th>
+              <th>Turma</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-alunos">
+            <!-- Alunos serão listados aqui -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="aba-gestores" class="conteudo-aba">
+        <div class="toolbar-admin">
+          <input type="text" id="busca-gestores" placeholder="Buscar gestor..." class="campo-busca">
+          <button id="btn-novo-gestor" class="botao-primario">
+            <i class="fas fa-plus"></i> Novo Gestor
+          </button>
+        </div>
+        <table class="tabela-admin">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Permissões</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-gestores">
+            <!-- Gestores serão listados aqui -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="aba-estatisticas" class="conteudo-aba">
+        <div class="grid-stats">
+          <div class="card-stat">
+            <i class="fas fa-users"></i>
+            <h3>Total de Alunos</h3>
+            <p id="total-alunos">0</p>
+          </div>
+          <div class="card-stat">
+            <i class="fas fa-user-check"></i>
+            <h3>Alunos Ativos</h3>
+            <p id="alunos-ativos">0</p>
+          </div>
+          <div class="card-stat">
+            <i class="fas fa-user-tie"></i>
+            <h3>Gestores</h3>
+            <p id="total-gestores">0</p>
+          </div>
+          <div class="card-stat">
+            <i class="fas fa-chart-line"></i>
+            <h3>Taxa Presença</h3>
+            <p id="taxa-presenca">95%</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      verificarAutenticacao('admin');
+      inicializarAdmin();
+      configurarMenu();
+    });
+  </script>
+</body>
+</html>

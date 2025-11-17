@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carteirinha SENAI - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="barra-navegacao" role="navigation">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-nav" aria-label="Logo Carteirinha SENAI">
+        <i class="fas fa-graduation-cap"></i>
+        <span>SENAI</span>
+      </a>
+
+      <button class="botao-menu-hamburger" id="btn-menu" aria-label="Abrir menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
+        <li><a href="dashboard.html" class="ativo"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="perfil.html"><i class="fas fa-user-circle"></i> Perfil</a></li>
+        <li><a href="scanner.html"><i class="fas fa-qrcode"></i> Scanner</a></li>
+        <li><a href="notificacoes.html"><i class="fas fa-bell"></i> Notificações <span class="badge-notif">3</span></a></li>
+        <li><a href="admin.html"><i class="fas fa-cog"></i> Admin</a></li>
+        <li><a href="#" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="conteudo-principal">
+    <section class="secao-hero">
+      <h2>Bem-vindo, <span id="nome-usuario">Aluno</span>!</h2>
+      <p>Seu acesso rápido às funções principais</p>
+    </section>
+
+    <section class="secao-resumo">
+      <div class="card-resumo">
+        <div class="icone-card">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div class="info-card">
+          <h3>Status</h3>
+          <p class="status-ativo">● Ativo</p>
+        </div>
+      </div>
+
+      <div class="card-resumo">
+        <div class="icone-card">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="info-card">
+          <h3>Ver presença</h3>
+          <a href="https://www.sp.senai.br/sou-aluno">Aqui</a>
+        </div>
+      </div>
+
+      <div class="card-resumo">
+        <div class="icone-card">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="info-card">
+          <h3>Últimos Acessos</h3>
+          <p id="total-acessos">0</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao-qrcode-principal">
+      <div class="card-qrcode">
+        <div class="header-qrcode">
+          <h3>Seu QR Code de Acesso</h3>
+          <p>Válido por: <span id="tempo-validade">30s</span></p>
+        </div>
+
+        <div class="container-qrcode">
+          <div id="qrcode-gerado"></div>
+          <p class="info-qrcode">Passe este código no scanner para registrar entrada/saída</p>
+        </div>
+
+        <button id="btn-atualizar-qr" class="botao-atualizar-qr">
+          <i class="fas fa-sync-alt"></i> Atualizar QR Code
+        </button>
+      </div>
+    </section>
+
+    <section class="secao-timeline">
+      <h3>Últimos Acessos</h3>
+      <div id="timeline-acessos" class="timeline-acessos">
+        <div class="item-timeline">
+          <div class="ponto-timeline"></div>
+          <div class="conteudo-timeline">
+            <p class="horario-acesso">Carregando acessos...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      verificarAutenticacao();
+      inicializarDashboard();
+      configurarMenu();
+    });
+  </script>
+</body>
+</html>
