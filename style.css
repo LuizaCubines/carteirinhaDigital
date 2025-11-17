@@ -42,6 +42,11 @@ body {
   min-height: 100vh;
 }
 
+a{
+  text-decoration: none;
+  color: var(--cor-primaria);
+}
+
 /* TELA DE LOGIN */
 .tela-login {
   display: flex;
@@ -1355,4 +1360,5 @@ body {
   .filtro-btn {
     width: 100%;
   }
+
 }
