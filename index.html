@@ -52,6 +52,12 @@
             <label for="lembrar-me">Lembrar-me neste computador</label>
           </div>
 
+          <!-- ADICIONE ESTA PARTE -->
+          <div class="grupo-checkbox">
+            <input type="checkbox" id="modo-escuro-login">
+            <label for="modo-escuro-login">Modo Escuro</label>
+          </div>
+
           <button type="submit" class="botao-entrar">
             <span>Entrar</span>
             <i class="fas fa-arrow-right"></i>
@@ -61,7 +67,7 @@
         <div class="opcoes-teste">
           <p>Contas de teste:</p>
           <button class="btn-teste" data-tipo="aluno" aria-label="Entrar como aluno de teste">
-            <i class="fas fa-student"></i> Aluno
+            <i class="fas fa-user-graduate"></i> Aluno
           </button>
           <button class="btn-teste" data-tipo="admin" aria-label="Entrar como admin de teste">
             <i class="fas fa-shield-alt"></i> Admin
@@ -75,5 +81,19 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    // Inicializar modo escuro na tela de login
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarModoEscuro();
+      
+      // Configurar evento do checkbox de modo escuro
+      const modoEscuroLogin = document.getElementById('modo-escuro-login');
+      if (modoEscuroLogin) {
+        modoEscuroLogin.addEventListener('change', (e) => {
+          alternarModoEscuro(e.target.checked);
+        });
+      }
+    });
+  </script>
 </body>
 </html>

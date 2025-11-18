@@ -109,11 +109,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      verificarAutenticacao();
-      inicializarDashboard();
-      configurarMenu();
-    });
-  </script>
+  document.addEventListener('DOMContentLoaded', () => {
+    verificarAutenticacao();
+    carregarModoEscuro(); // ← Esta linha PRIMEIRO
+    inicializarDashboard();
+    configurarMenu();
+    
+    // Debug
+    console.log('Dashboard carregado');
+    console.log('Modo escuro ativo:', document.body.classList.contains('dark-mode'));
+  });
+</script>
 </body>
 </html>

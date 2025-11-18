@@ -58,6 +58,33 @@ let notificacoes = [
 
 let tempoValidadeQR = 30;
 
+// ========== MODO ESCURO ==========
+function carregarModoEscuro() {
+  const modoSalvo = localStorage.getItem('modo-escuro');
+  if (modoSalvo === 'true') {
+    document.body.classList.add('dark-mode');
+    
+    // Atualizar checkbox se existir na página
+    const modoEscuroCheckbox = document.getElementById('modo-escuro');
+    if (modoEscuroCheckbox) {
+      modoEscuroCheckbox.checked = true;
+    }
+  }
+}
+
+// FUNÇÃO QUE ESTAVA FALTANDO
+function alternarModoEscuro(ativo) {
+  console.log('Alternando modo escuro:', ativo);
+  
+  if (ativo) {
+    document.body.classList.add('dark-mode');
+    localStorage.setItem('modo-escuro', 'true');
+  } else {
+    document.body.classList.remove('dark-mode');
+    localStorage.setItem('modo-escuro', 'false');
+  }
+}
+
 // ========== AUTENTICAÇÃO ==========
 function verificarAutenticacao(tipoRequerido = null) {
   const sessao = localStorage.getItem('sessao_carteirinha');
@@ -331,8 +358,15 @@ function inicializarPerfil() {
   // Modo escuro
   const modoEscuro = document.getElementById('modo-escuro');
   if (modoEscuro) {
-    modoEscuro.addEventListener('change', () => {
-      document.body.classList.toggle('dark-mode');
+    // Carregar preferência salva
+    const modoSalvo = localStorage.getItem('modo-escuro');
+    if (modoSalvo === 'true') {
+      modoEscuro.checked = true;
+    }
+
+    modoEscuro.addEventListener('change', (e) => {
+      console.log('Modo escuro alterado:', e.target.checked);
+      alternarModoEscuro(e.target.checked);
     });
   }
 }

@@ -125,11 +125,12 @@
 
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      verificarAutenticacao('admin');
-      inicializarAdmin();
-      configurarMenu();
-    });
-  </script>
+  document.addEventListener('DOMContentLoaded', () => {
+    verificarAutenticacao('admin');
+    carregarModoEscuro(); // ← Esta linha PRIMEIRO
+    inicializarAdmin();
+    configurarMenu();
+  });
+</script>
 </body>
 </html>

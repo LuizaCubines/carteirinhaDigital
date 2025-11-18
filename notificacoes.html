@@ -66,12 +66,13 @@
   </footer>
 
   <script src="js/app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      verificarAutenticacao();
-      inicializarNotificacoes();
-      configurarMenu();
-    });
-  </script>
+ <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    verificarAutenticacao();
+    carregarModoEscuro(); // ← Esta linha PRIMEIRO
+    inicializarNotificacoes();
+    configurarMenu();
+  });
+</script>
 </body>
 </html>
