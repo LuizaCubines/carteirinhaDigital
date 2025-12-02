@@ -25,6 +25,24 @@ session_start();
         <h1>Administrador</h1>
       </div>
 
+      <?php if (isset($_GET['erro'])): ?>
+        <div class="alert alert-danger">
+          <?php 
+          $erro = $_GET['erro'];
+          switch($erro) {
+            case 'credenciais':
+              echo 'Email ou senha incorretos!';
+              break;
+            case 'sessao':
+              echo 'Sessão expirada. Faça login novamente.';
+              break;
+            default:
+              echo 'Erro ao fazer login. Tente novamente.';
+          }
+          ?>
+        </div>
+      <?php endif; ?>
+
       <form action="verificar_admin.php" method="POST" class="formulario-login">
 
         <!-- Email -->
@@ -38,6 +56,7 @@ session_start();
               name="email"
               placeholder="Digite o email do administrador"
               required
+              value="<?php echo isset($_GET['email']) ? htmlspecialchars($_GET['email']) : ''; ?>"
             >
           </div>
         </div>

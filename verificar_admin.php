@@ -2,32 +2,52 @@
 session_start();
 include "conexao.php";
 
-$email = $_POST["email"];
-$senha = $_POST["senha"];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: admin_login.php");
+    exit;
+}
 
-// buscar administrador
-$sql = "SELECT * FROM administrador WHERE email = '$email' LIMIT 1";
-$result = $conn->query($sql);
+$email = trim($_POST["email"] ?? '');
+$senha = $_POST["senha"] ?? '';
 
-if ($result->num_rows > 0) {
+if (empty($email) || empty($senha)) {
+    header("Location: admin_login.php?erro=credenciais&email=" . urlencode($email));
+    exit;
+}
 
-    $adm = $result->fetch_assoc();
+// Usar prepared statements para segurança
+$sql = "SELECT id, nome, email, senha FROM administrador WHERE email = ? LIMIT 1";
+$stmt = $conn->prepare($sql);
 
-    if (password_verify($senha, $adm["senha"])) {
+if ($stmt) {
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        $_SESSION["adm_id"]   = $adm["id"];
-        $_SESSION["adm_nome"] = $adm["nome"];
+    if ($result->num_rows > 0) {
+        $adm = $result->fetch_assoc();
 
-        header("Location: painel_admin.php");
-        exit;
+        if (password_verify($senha, $adm["senha"])) {
+            $_SESSION["adm_id"] = $adm["id"];
+            $_SESSION["adm_nome"] = $adm["nome"];
+            $_SESSION["adm_email"] = $adm["email"];
+            $_SESSION["tipo_usuario"] = "admin";
 
+            header("Location: painel_admin.php");
+            exit;
+        } else {
+            header("Location: admin_login.php?erro=credenciais&email=" . urlencode($email));
+            exit;
+        }
     } else {
-        echo "<script>alert('Senha incorreta!'); history.back();</script>";
+        header("Location: admin_login.php?erro=credenciais&email=" . urlencode($email));
+        exit;
     }
 
+    $stmt->close();
 } else {
-    echo "<script>alert('Administrador não encontrado!'); history.back();</script>";
+    header("Location: admin_login.php?erro=erro");
+    exit;
 }
 
 $conn->close();
-?>

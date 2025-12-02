@@ -39,7 +39,7 @@ $conn->close();
 <!-- Barra de navegação -->
 <nav class="barra-navegacao" role="navigation">
     <div class="nav-container">
-        <a href="dashboard.html" class="logo-nav" aria-label="Logo Carteirinha SENAI">
+        <a href="dashboard.php" class="logo-nav" aria-label="Logo Carteirinha SENAI">
             <i class="fas fa-graduation-cap"></i>
             <span>SENAI</span>
         </a>
@@ -47,11 +47,10 @@ $conn->close();
             <span></span><span></span><span></span>
         </button>
         <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
-            <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="perfil_aluno.php" class="ativo"><i class="fas fa-user-circle"></i> Perfil</a></li>
-            <li><a href="scanner.html"><i class="fas fa-qrcode"></i> Scanner</a></li>
+            <li><a href="scanner.php"><i class="fas fa-qrcode"></i> Scanner</a></li>
             <li><a href="notificacoes.html"><i class="fas fa-bell"></i> Notificações</a></li>
-            <li><a href="admin.html"><i class="fas fa-cog"></i> Admin</a></li>
             <li><a href="logout.php" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
         </ul>
     </div>
