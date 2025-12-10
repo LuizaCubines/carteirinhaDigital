@@ -76,6 +76,10 @@ session_start();
           </div>
         </div>
 
+        <div class="grupo-checkbox">
+            <input type="checkbox" id="modo-escuro-login">
+            <label for="modo-escuro-login">Modo Escuro</label>
+          </div>
         <!-- Botão -->
         <button type="submit" class="botao-entrar">
           <span>Entrar</span>
@@ -96,6 +100,6 @@ session_start();
     <div class="decoracao-fundo"></div>
   </div>
 </div>
-
+ <script src="js/modo-escuro.js"></script>
 </body>
 </html>

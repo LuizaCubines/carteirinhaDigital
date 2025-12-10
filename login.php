@@ -1,7 +1,7 @@
 <?php
 session_start();
 ?>
-<!--http://localhost/testeqrcode/login.php -->
+<!--http://localhost/carteirinhaDigital-main/login.php-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -24,7 +24,7 @@ session_start();
           <h1>Carteirinha SENAI</h1>
         </div>
 
-        <!-- FORMULÁRIO CORRIGIDO PARA PHP -->
+        
         <form action="verificar_login.php" method="POST" class="formulario-login">
 
           <div class="grupo-campo">
@@ -83,7 +83,7 @@ session_start();
     </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <script src="js/modo-escuro.js"></script>
 
 </body>
 </html>

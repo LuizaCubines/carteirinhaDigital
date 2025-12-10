@@ -17,15 +17,14 @@ $stmt_check->execute();
 $stmt_check->store_result();
 
 if ($stmt_check->num_rows === 0) {
-    // Admin não existe mais
     session_destroy();
     header("Location: admin_login.php?erro=sessao");
     exit;
 }
 $stmt_check->close();
 
-// Resto do código continua igual...
-// BUSCAR ALUNOS COM DETALHES
+
+
 $sql_alunos = "SELECT a.*, 
                (SELECT COUNT(*) FROM acesso WHERE aluno_id = a.id) as total_acessos,
                (SELECT COUNT(*) FROM acesso WHERE aluno_id = a.id AND DATE(data_entrada) = CURDATE()) as acessos_hoje
@@ -33,9 +32,8 @@ $sql_alunos = "SELECT a.*,
                ORDER BY nome ASC";
 $result_alunos = $conn->query($sql_alunos);
 
-// ... resto do código permanece igual
 
-// PARA ESTATÍSTICAS
+
 $total_alunos = $result_alunos->num_rows;
 $ativos = 0;
 
@@ -45,7 +43,7 @@ while ($row = $result_alunos->fetch_assoc()) {
     if ($row["ativo"] == 1) $ativos++;
 }
 
-// BUSCAR ÚLTIMOS ACESSOS
+// Busca os últimos acessos
 $sql_acessos = "SELECT ac.*, a.nome, a.ra, a.turma 
                 FROM acesso ac 
                 JOIN aluno a ON ac.aluno_id = a.id 
@@ -77,7 +75,7 @@ $stats = $result_stats->fetch_assoc();
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     .badge {
       display: inline-block;
@@ -122,9 +120,9 @@ $stats = $result_stats->fetch_assoc();
       </button>
 
       <ul class="menu-navegacao" id="menu-navegacao">
-        <li><a href="#" class="ativo"><i class="fas fa-cog"></i> Admin</a></li>
-        <li><a href="scanner.html"><i class="fas fa-qrcode"></i> Scanner</a></li>
-        <li><a href="comunicados.html"><i class="fas fa-bullhorn"></i> Comunicados</a></li>
+        <li><a href="painel_admin.php" class="ativo"><i class="fas fa-cog"></i> Admin</a></li>
+        <li><a href="scanner.php"><i class="fas fa-qrcode"></i> Scanner</a></li>
+        <li><a href="criar_comunicados.php"><i class="fas fa-bullhorn"></i> Comunicados</a></li>
         <li>
           <a href="admin_logout.php" class="btn-sair">
             <i class="fas fa-sign-out-alt"></i> Sair (<?php echo htmlspecialchars($_SESSION['adm_nome']); ?>)
@@ -138,6 +136,10 @@ $stats = $result_stats->fetch_assoc();
     <section class="secao-admin">
       <h2>Painel Administrativo</h2>
       <p>Bem-vindo, <?php echo htmlspecialchars($_SESSION['adm_nome']); ?> | Gerenciar alunos e acessos</p>
+      <div class="grupo-checkbox">
+            <input type="checkbox" id="modo-escuro-login">
+            <label for="modo-escuro-login">Modo Escuro</label>
+          </div>
 
       <div class="abas-admin">
         <button class="aba-btn ativo" data-aba="alunos"><i class="fas fa-users"></i> Alunos</button>
@@ -342,8 +344,24 @@ $stats = $result_stats->fetch_assoc();
   </main>
 
   <footer class="rodape">
-    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
-  </footer>
+    <div class="rodape-container">
+
+        <nav class="rodape-links">
+            <a href="https://github.com/LuizaCubines/carteirinhaDigital.git" target="_blank">GitHub</a>
+            <a href="https://sesisenaispedu-my.sharepoint.com/:w:/g/personal/luiza_cubines2_senaisp_edu_br/IQBfLng_UpdOT4rbqF4QnXd9AYTZB3-n6QJgW-jmCik7amc?e=6t0jpt">Documentação</a>
+        </nav>
+
+        <p class="rodape-copy">
+            © 2025 Carteirinha Digital SENAI — Todos os direitos reservados.
+        </p>
+
+        <p class="rodape-creditos">
+            <span class="icon-codigo"></span> Desenvolvido por <strong>EGLA Squad</strong>
+        </p>
+
+    </div>
+</footer>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -404,7 +422,7 @@ $stats = $result_stats->fetch_assoc();
       }
     });
   </script>
-
+  <script src="js/modo-escuro.js" ></script>
 </body>
 </html>
 <?php $conn->close(); ?>

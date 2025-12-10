@@ -20,10 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['qr_data'])) {
         $expectedHash = md5($qrData['ra'] . 'SENAI2025_PERMANENTE');
         
         if ($qrData['hash'] === $expectedHash && $qrData['instituicao'] === 'SENAI') {
-            $aluno_id = $qrData['id'];
-            $nome = $qrData['nome'];
-            $ra = $qrData['ra'];
-            $turma = $qrData['turma'];
+           $ra = $qrData['ra'];
+
+            $sql = "SELECT * FROM aluno WHERE ra = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $ra);
+            $stmt->execute();
+            $aluno = $stmt->get_result()->fetch_assoc();
+
+            if (!$aluno) {
+                $mensagem = "Aluno não encontrado no banco!";
+                $tipo = "error";
+            } else {
+                $aluno_id = $aluno['id'];
+                $nome = $aluno['nome'];
+                $turma = $aluno['turma'];
+            }
             
             // Registrar entrada/saída no banco usando MySQLi
             try {
@@ -121,94 +133,12 @@ if (isset($conn) && $conn) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Estilos para o scanner */
-    .container-camera {
-        border: 2px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .mensagem-flutuante {
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-        max-width: 400px;
-    }
-    
-    .mensagem-flutuante.success {
-        background-color: #4CAF50;
-    }
-    
-    .mensagem-flutuante.error {
-        background-color: #f44336;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    .item-scan {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .info-aluno {
-        flex: 1;
-    }
-    
-    .info-acesso {
-        text-align: right;
-    }
-    
-    .entrada { color: #28a745; font-weight: 600; }
-    .saida { color: #dc3545; font-weight: 600; }
-    
-    .botao-terciario {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
-    }
-    
-    .botao-terciario:hover {
-        background-color: #5a6268;
-    }
-    
-    .alertas-sistema {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 20px 0;
-        color: #856404;
-    }
-  </style>
+
 </head>
 <body>
   <nav class="barra-navegacao" role="navigation">
     <div class="nav-container">
-      <a href="scanner.php" class="logo-nav" aria-label="Logo Carteirinha SENAI">
+      <a href="painel_admin.php" class="logo-nav" aria-label="Logo Carteirinha SENAI">
         <i class="fas fa-graduation-cap"></i>
         <span>SENAI</span>
       </a>
@@ -220,12 +150,19 @@ if (isset($conn) && $conn) {
       </button>
 
       <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
+        <li><a href="painel_admin.php"><i class="fas fa-cog"></i> Admin</a></li>
         <li><a href="scanner.php" class="ativo"><i class="fas fa-qrcode"></i> Scanner</a></li>
-        <li><a href="login.php"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+         <li><a href="criar_comunicados.php"><i class="fas fa-bullhorn"></i> Comunicados</a></li>
+         <li>
+          <a href="admin_logout.php" class="btn-sair">
+            <i class="fas fa-sign-out-alt"></i> Sair </a>
+        </li>
       </ul>
     </div>
   </nav>
 
+  
+  
   <main class="conteudo-principal">
     <?php if ($mensagem): ?>
       <div class="mensagem-flutuante <?php echo $tipo; ?>" id="mensagem">
@@ -267,6 +204,28 @@ if (isset($conn) && $conn) {
         </button>
       </div>
 
+      <div id="simulacao-container" style="display:none; margin-top:20px;">
+    <label>Selecione um aluno:</label>
+    <select id="select-aluno" class="botao-terciario">
+        <option value="">-- Escolha --</option>
+        <?php
+        $res = $conn->query("SELECT id, nome, ra, turma FROM aluno ORDER BY nome");
+        while ($a = $res->fetch_assoc()):
+        ?>
+            <option value="<?= $a['id'] ?>" 
+                data-ra="<?= $a['ra'] ?>"
+                data-nome="<?= $a['nome'] ?>"
+                data-turma="<?= $a['turma'] ?>">
+                <?= $a['nome'] ?> (<?= $a['ra'] ?>)
+            </option>
+        <?php endwhile; ?>
+    </select>
+
+    <button id="btn-confirmar-simulacao" class="botao-primario" style="margin-top:10px;">
+        Usar este aluno
+    </button>
+</div>
+
       <div id="resultado-scan" class="resultado-scan" style="display: none;">
         <div class="feedback-scan">
           <i class="fas fa-check-circle"></i>
@@ -286,18 +245,18 @@ if (isset($conn) && $conn) {
           <?php else: ?>
             <?php foreach ($historico as $scan): ?>
               <div class="item-scan">
-                <div class="info-aluno">
+                <div class="info-aluno"  style="color:#5a5a5a">
                   <strong><?php echo htmlspecialchars($scan['nome']); ?></strong><br>
                   <span>RA: <?php echo htmlspecialchars($scan['ra']); ?> - Turma: <?php echo htmlspecialchars($scan['turma']); ?></span>
                 </div>
                 <div class="info-acesso">
                   <?php if ($scan['data_entrada']): ?>
-                    <span class="entrada">Entrada: <?php echo date('H:i', strtotime($scan['data_entrada'])); ?></span><br>
+                    <span class="entradaaluno">Entrada: <?php echo date('H:i', strtotime($scan['data_entrada'])); ?></span><br>
                   <?php endif; ?>
                   <?php if ($scan['data_saida']): ?>
-                    <span class="saida">Saída: <?php echo date('H:i', strtotime($scan['data_saida'])); ?></span>
+                    <span class="saidaaluno">Saída: <?php echo date('H:i', strtotime($scan['data_saida'])); ?></span>
                   <?php else: ?>
-                    <span class="entrada" style="color: orange;">Em aula</span>
+                    <span class="entradaaluno" style="color: orange;">Em aula</span>
                   <?php endif; ?>
                 </div>
               </div>
@@ -309,161 +268,187 @@ if (isset($conn) && $conn) {
   </main>
 
   <footer class="rodape">
-    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
-  </footer>
+    <div class="rodape-container">
 
+        <nav class="rodape-links">
+            <a href="https://github.com/LuizaCubines/carteirinhaDigital.git" target="_blank">GitHub </a>
+            <a href="https://sesisenaispedu-my.sharepoint.com/:w:/g/personal/luiza_cubines2_senaisp_edu_br/IQBfLng_UpdOT4rbqF4QnXd9AYTZB3-n6QJgW-jmCik7amc?e=6t0jpt">Documentação</a>
+        </nav>
+
+        <p class="rodape-copy">
+            © 2025 Carteirinha Digital SENAI — Todos os direitos reservados.
+        </p>
+
+        <p class="rodape-creditos">
+            <span class="icon-codigo"></span> Desenvolvido por <strong>EGLA Squad</strong>
+        </p>
+
+    </div>
+</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Elementos da interface
-        const scannerBtn = document.getElementById('btn-iniciar-scanner');
-        const stopBtn = document.getElementById('btn-parar-scanner');
-        const simulateBtn = document.getElementById('btn-simular-scan');
-        const resultDiv = document.getElementById('resultado-scan');
-        const infoScan = document.getElementById('info-scan');
-        const statusScan = document.getElementById('status-scan');
-        
-        let html5QrcodeScanner = null;
-        let isScanning = false;
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos da interface
+    const scannerBtn = document.getElementById('btn-iniciar-scanner');
+    const stopBtn = document.getElementById('btn-parar-scanner');
+    const simulateBtn = document.getElementById('btn-simular-scan');
+    const simContainer = document.getElementById('simulacao-container');
+    const confirmarSimBtn = document.getElementById('btn-confirmar-simulacao');
+    const selectAluno = document.getElementById('select-aluno');
+    const resultDiv = document.getElementById('resultado-scan');
+    const infoScan = document.getElementById('info-scan');
+    const statusScan = document.getElementById('status-scan');
 
-        // Iniciar scanner
-        if (scannerBtn) {
-            scannerBtn.addEventListener('click', iniciarScanner);
-        }
+    let html5QrcodeScanner = null;
+    let isScanning = false;
 
-        // Parar scanner
-        if (stopBtn) {
-            stopBtn.addEventListener('click', pararScanner);
-        }
+    // Iniciar scanner
+    if (scannerBtn) {
+        scannerBtn.addEventListener('click', iniciarScanner);
+    }
 
-        // Simular scan para testes
-        if (simulateBtn) {
-            simulateBtn.addEventListener('click', function() {
-                // Dados de exemplo para teste
-                const qrDataTeste = {
-                    ra: '2023001',
-                    nome: 'João Silva',
-                    turma: 'DS2023',
-                    id: 1,
-                    instituicao: 'SENAI',
-                    hash: '<?php echo md5("2023001" . "SENAI2025_PERMANENTE"); ?>'
-                };
-                
-                processarQRCode(qrDataTeste, true);
+    // Parar scanner
+    if (stopBtn) {
+        stopBtn.addEventListener('click', pararScanner);
+    }
+
+    // Mostrar container de simulação (apenas um listener)
+    if (simulateBtn && simContainer) {
+        simulateBtn.addEventListener('click', () => {
+            simContainer.style.display = 'block';
+        });
+    }
+
+    // Confirmar simulação (gera QR válido e envia)
+    if (confirmarSimBtn && selectAluno) {
+        confirmarSimBtn.addEventListener('click', () => {
+            const opt = selectAluno.options[selectAluno.selectedIndex];
+            if (!opt || !opt.value) {
+                return alert('Selecione um aluno!');
+            }
+
+            const ra = opt.dataset.ra;
+            const nome = opt.dataset.nome;
+            const turma = opt.dataset.turma;
+            const id = opt.value;
+
+            // Gerar hash MD5 do RA + chave fixa (mesma lógica do servidor)
+            const chave = 'SENAI2025_PERMANENTE';
+            const hash = CryptoJS.MD5(ra + chave).toString();
+
+            const qrData = {
+                ra: ra,
+                nome: nome,
+                turma: turma,
+                id: id,
+                instituicao: 'SENAI',
+                hash: hash
+            };
+
+            // mostrar info temporária na UI
+            if (infoScan) infoScan.textContent = `Simulando: ${nome} (RA ${ra})`;
+            if (statusScan) {
+                statusScan.textContent = 'Enviando simulação...';
+                statusScan.style.color = '';
+            }
+            resultDiv.style.display = 'block';
+
+            processarQRCode(qrData, true);
+        });
+    }
+
+    function iniciarScanner() {
+        if (isScanning) return;
+
+        // Inicia o scanner sem checks extras de tipos
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+        scannerBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        isScanning = true;
+    }
+
+    function pararScanner() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().then(() => {
+                scannerBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'none';
+                isScanning = false;
+            }).catch(error => {
+                console.error("Erro ao parar scanner:", error);
             });
         }
+    }
 
-        function iniciarScanner() {
-            if (isScanning) return;
-            
-            // Verificar permissão da câmera
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    // Inicia o scanner
-                    html5QrcodeScanner = new Html5QrcodeScanner(
-                        "reader", 
-                        { 
-                            fps: 10, 
-                            qrbox: 250,
-                            rememberLastUsedCamera: true,
-                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                        }
-                    );
-                    
-                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                    
-                    scannerBtn.style.display = 'none';
-                    stopBtn.style.display = 'inline-block';
-                    isScanning = true;
-                })
-                .catch(function(error) {
-                    alert("Erro ao acessar a câmera. Verifique as permissões do navegador.");
-                });
-        }
+    function onScanSuccess(decodedText, decodedResult) {
+        try {
+            const qrData = JSON.parse(decodedText);
 
-        function pararScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().then(() => {
-                    scannerBtn.style.display = 'inline-block';
-                    stopBtn.style.display = 'none';
-                    isScanning = false;
-                }).catch(error => {
-                    console.error("Erro ao parar scanner:", error);
-                });
+            if (!qrData.ra || !qrData.hash || !qrData.instituicao) {
+                throw new Error("QR Code inválido");
             }
-        }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            try {
-                // Parse dos dados do QR code
-                const qrData = JSON.parse(decodedText);
-                
-                // Validar estrutura mínima
-                if (!qrData.ra || !qrData.hash || !qrData.instituicao) {
-                    throw new Error("QR Code inválido");
-                }
-                
-                // Exibir resultado
-                infoScan.textContent = `Aluno: ${qrData.nome} (RA: ${qrData.ra})`;
-                statusScan.textContent = "Processando...";
-                resultDiv.style.display = 'block';
-                
-                // Processar QR code
-                processarQRCode(qrData);
-                
-                // Parar scanner após sucesso
-                setTimeout(() => {
-                    pararScanner();
-                    // Limpar resultado após 3 segundos
-                    setTimeout(() => {
-                        resultDiv.style.display = 'none';
-                    }, 3000);
-                }, 1000);
-                
-            } catch (error) {
-                console.error("Erro ao processar QR code:", error);
-                alert("QR Code inválido ou corrompido!");
+            if (infoScan) infoScan.textContent = `Aluno: ${qrData.nome || '—'} (RA: ${qrData.ra})`;
+            if (statusScan) statusScan.textContent = "Processando...";
+
+            resultDiv.style.display = 'block';
+            processarQRCode(qrData);
+
+            // parar scanner e ocultar feedback depois
+            setTimeout(() => {
                 pararScanner();
+                setTimeout(() => { resultDiv.style.display = 'none'; }, 3000);
+            }, 1000);
+
+        } catch (error) {
+            console.error("Erro ao processar QR code:", error);
+            alert("QR Code inválido ou corrompido!");
+            try { pararScanner(); } catch {}
+        }
+    }
+
+    function onScanFailure(error) {
+        // manter limpo — logs opcionais
+        // console.warn("Scan failure:", error);
+    }
+
+    function processarQRCode(qrData, isSimulado = false) {
+        fetch('scanner.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `qr_data=${encodeURIComponent(JSON.stringify(qrData))}`
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na rede');
+            return response.text();
+        })
+        .then(html => {
+            // recarrega para ver histórico e mensagens do servidor
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            if (statusScan) {
+                statusScan.textContent = "Erro ao processar. Tente novamente.";
+                statusScan.style.color = "red";
             }
-        }
+        });
+    }
 
-        function onScanFailure(error) {
-            // Não mostra erro no console a menos que seja necessário
-        }
+    // Auto-iniciar scanner em dispositivos móveis (opcional)
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        setTimeout(iniciarScanner, 1000);
+    }
+});
 
-        function processarQRCode(qrData, isSimulado = false) {
-            // Enviar para o servidor
-            fetch('scanner.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `qr_data=${encodeURIComponent(JSON.stringify(qrData))}`
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro na rede');
-                }
-                return response.text();
-            })
-            .then(html => {
-                // Recarrega a página para mostrar a mensagem e atualizar histórico
-                window.location.reload();
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                if (statusScan) {
-                    statusScan.textContent = "Erro ao processar. Tente novamente.";
-                    statusScan.style.color = "red";
-                }
-            });
-        }
-
-        // Auto-iniciar scanner em dispositivos móveis
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            setTimeout(iniciarScanner, 1000);
-        }
-    });
+    // Modo escuro
+    document.addEventListener('DOMContentLoaded', function() {
+    const modoEscuroAtivo = localStorage.getItem('modoEscuro') === 'true';
+    if (modoEscuroAtivo) {
+        document.body.classList.add('dark-mode');}});
   </script>
 </body>
 </html>

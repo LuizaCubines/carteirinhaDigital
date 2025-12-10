@@ -15,7 +15,6 @@ if (empty($email) || empty($senha)) {
     exit;
 }
 
-// Usar prepared statements para segurança
 $sql = "SELECT id, nome, email, senha FROM administrador WHERE email = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
 
@@ -27,11 +26,31 @@ if ($stmt) {
     if ($result->num_rows > 0) {
         $adm = $result->fetch_assoc();
 
+       
         if (password_verify($senha, $adm["senha"])) {
+            
             $_SESSION["adm_id"] = $adm["id"];
             $_SESSION["adm_nome"] = $adm["nome"];
             $_SESSION["adm_email"] = $adm["email"];
             $_SESSION["tipo_usuario"] = "admin";
+
+            header("Location: painel_admin.php");
+            exit;
+        } 
+       
+        else if ($senha === $adm["senha"] || md5($senha) === $adm["senha"]) {
+          
+            $_SESSION["adm_id"] = $adm["id"];
+            $_SESSION["adm_nome"] = $adm["nome"];
+            $_SESSION["adm_email"] = $adm["email"];
+            $_SESSION["tipo_usuario"] = "admin";
+
+            $novo_hash = password_hash($senha, PASSWORD_DEFAULT);
+            $update_sql = "UPDATE administrador SET senha = ? WHERE id = ?";
+            $update_stmt = $conn->prepare($update_sql);
+            $update_stmt->bind_param("si", $novo_hash, $adm["id"]);
+            $update_stmt->execute();
+            $update_stmt->close();
 
             header("Location: painel_admin.php");
             exit;
@@ -51,3 +70,4 @@ if ($stmt) {
 }
 
 $conn->close();
+?>

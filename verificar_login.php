@@ -5,23 +5,31 @@ include "conexao.php";
 $usuario = $_POST['usuario']; // pode ser RA ou email
 $senha = $_POST['senha'];
 
-// Verifica se corresponde a RA ou a Email
+// Proteger contra SQL Injection
 $sql = "SELECT * FROM aluno 
-        WHERE email = '$usuario' 
-        OR ra = '$usuario'
+        WHERE (email = ? OR ra = ?)
+        AND ativo = 1
         LIMIT 1";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $usuario, $usuario);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-
     $aluno = $result->fetch_assoc();
 
     if (password_verify($senha, $aluno['senha'])) {
         
-        $_SESSION['id_aluno']  = $aluno['id'];
-        $_SESSION['nome_aluno'] = $aluno['nome'];
+        $_SESSION['aluno_id'] = $aluno['id'];
+        $_SESSION['tipo_usuario'] = 'aluno';  
+        $_SESSION['aluno_nome'] = $aluno['nome'];
+        $_SESSION['aluno_ra'] = $aluno['ra'];
+        $_SESSION['aluno_turma'] = $aluno['turma'];
+        
 
+        echo "<script>console.log('Sessão configurada: aluno_id=" . $aluno['id'] . ", tipo=aluno');</script>";
+        
         header("Location: perfil_aluno.php");
         exit;
 
@@ -33,5 +41,6 @@ if ($result->num_rows > 0) {
     echo "<script>alert('Usuário não encontrado!'); history.back();</script>";
 }
 
+$stmt->close();
 $conn->close();
 ?>

@@ -121,8 +121,6 @@ session_start();
     <div class="decoracao-fundo"></div>
   </div>
 </div>
-
-<script src="js/app.js"></script>
-
+  <script src="js/modo-escuro.js"></script>
 </body>
 </html>

@@ -17,6 +17,13 @@ CREATE TABLE aluno (
 );
 
 USE escola;
+CREATE TABLE administrador (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE comunicado (
     id_comunicado INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
@@ -27,13 +34,6 @@ CREATE TABLE comunicado (
     -- Relacionamento com administrador
     adm_id INT NOT NULL,
     FOREIGN KEY (adm_id) REFERENCES administrador(id)
-);
-
-CREATE TABLE administrador (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL
 );
 
 
@@ -55,5 +55,5 @@ VALUES (
     'senai1234'
 );
 
-SELECT * FROM aluno WHERE id = 2;
+SELECT * FROM aluno WHERE id = 1;
 

@@ -3,7 +3,7 @@
 session_start();
 
 // Verificar se o aluno está logado
-if (!isset($_SESSION['id_aluno'])) {
+if (!isset($_SESSION['aluno_id'])) {
     header('Location: login.php');
     exit();
 }
@@ -12,7 +12,7 @@ if (!isset($_SESSION['id_aluno'])) {
 include "conexao.php";
 
 // Buscar dados do aluno
-$aluno_id = $_SESSION['id_aluno'];
+$aluno_id = $_SESSION['aluno_id'];
 $sql = "SELECT id, ra, nome, turma, email, ativo FROM aluno WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $aluno_id);
@@ -87,19 +87,12 @@ $conn->close();
         <span>SENAI</span>
       </a>
 
-      <button class="botao-menu-hamburger" id="btn-menu" aria-label="Abrir menu" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
 
       <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
         <li><a href="dashboard.php" class="ativo"><i class="fas fa-home"></i> Dashboard</a></li>
         <li><a href="perfil_aluno.php"><i class="fas fa-user-circle"></i> Perfil</a></li>
-        <li><a href="scanner.php"><i class="fas fa-qrcode"></i> Scanner</a></li>
-        <li><a href="notificacoes.php"><i class="fas fa-bell"></i> Notificações <span class="badge-notif">3</span></a></li>
-        <li><a href="admin.php"><i class="fas fa-cog"></i> Admin</a></li>
-        <li><a href="#" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        <li><a href="avisos.php"><i class="fas fa-bell"></i> Avisos</a></li>
+        <li><a href="login.php" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
       </ul>
     </div>
   </nav>
@@ -202,41 +195,29 @@ $conn->close();
   </main>
 
   <footer class="rodape">
-    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
-  </footer>
+    <div class="rodape-container">
+
+        <nav class="rodape-links">
+            <a href="https://github.com/LuizaCubines/carteirinhaDigital.git" target="_blank">GitHub</a>
+            <a href="https://sesisenaispedu-my.sharepoint.com/:w:/g/personal/luiza_cubines2_senaisp_edu_br/IQBfLng_UpdOT4rbqF4QnXd9AYTZB3-n6QJgW-jmCik7amc?e=6t0jpt">Documentação</a>
+        </nav>
+
+        <p class="rodape-copy">
+            © 2025 Carteirinha Digital SENAI — Todos os direitos reservados.
+        </p>
+
+        <p class="rodape-creditos">
+            <span class="icon-codigo"></span> Desenvolvido por <strong>EGLA Squad</strong>
+        </p>
+
+    </div>
+</footer>
 
   <script>
-  // Menu hamburguer
-  const btnMenu = document.getElementById('btn-menu');
-  const menuNavegacao = document.getElementById('menu-navegacao');
-  
-  if (btnMenu && menuNavegacao) {
-    btnMenu.addEventListener('click', function() {
-      menuNavegacao.classList.toggle('active');
-      this.setAttribute('aria-expanded', menuNavegacao.classList.contains('active'));
-    });
-  }
-
-  // Fechar menu ao clicar fora
-  document.addEventListener('click', function(event) {
-    if (btnMenu && menuNavegacao && 
-        !btnMenu.contains(event.target) && 
-        !menuNavegacao.contains(event.target) &&
-        menuNavegacao.classList.contains('active')) {
-      menuNavegacao.classList.remove('active');
-      btnMenu.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  // Logout com confirmação
-  document.getElementById('sair-btn')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    if (confirm('Deseja realmente sair?')) {
-      window.location.href = 'logout.php';
-    }
-  });
-
-
+  document.addEventListener('DOMContentLoaded', function() {
+    const modoEscuroAtivo = localStorage.getItem('modoEscuro') === 'true';
+    if (modoEscuroAtivo) {
+        document.body.classList.add('dark-mode');}});
   </script>
 </body>
 </html>

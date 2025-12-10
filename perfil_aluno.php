@@ -3,16 +3,16 @@ session_start();
 include "conexao.php";
 
 // Verifica se o aluno está logado
-if (!isset($_SESSION['id_aluno'])) {
-    header("Location: login_aluno.php"); // Redireciona se não estiver logado
+if (!isset($_SESSION['aluno_id'])) {
+    header("Location: login.php"); 
     exit;
 }
 
 // Pega o ID do aluno logado
-$id_aluno = $_SESSION['id_aluno'];
+$aluno_id = $_SESSION['aluno_id'];
 
 // Consulta os dados do aluno no banco
-$sql = "SELECT * FROM aluno WHERE id = '$id_aluno'";
+$sql = "SELECT * FROM aluno WHERE id = '$aluno_id'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -21,6 +21,24 @@ if ($result->num_rows > 0) {
     echo "Aluno não encontrado!";
     exit;
 }
+
+// Buscar total de acessos
+$sql_acessos = "SELECT COUNT(*) as total FROM acesso WHERE aluno_id = ?";
+$stmt = $conn->prepare($sql_acessos);
+$stmt->bind_param("i", $aluno_id);
+$stmt->execute();
+$result_acessos = $stmt->get_result();
+$total_acessos = $result_acessos->fetch_assoc()['total'];
+$stmt->close();
+
+// Buscar últimos acessos
+$sql_ultimos = "SELECT data_entrada, data_saida FROM acesso WHERE aluno_id = ? ORDER BY data_entrada DESC LIMIT 5";
+$stmt = $conn->prepare($sql_ultimos);
+$stmt->bind_param("i", $aluno_id);
+$stmt->execute();
+$ultimos_acessos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 
 $conn->close();
 ?>
@@ -49,8 +67,7 @@ $conn->close();
         <ul class="menu-navegacao" id="menu-navegacao" role="menubar">
             <li><a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="perfil_aluno.php" class="ativo"><i class="fas fa-user-circle"></i> Perfil</a></li>
-            <li><a href="scanner.php"><i class="fas fa-qrcode"></i> Scanner</a></li>
-            <li><a href="notificacoes.html"><i class="fas fa-bell"></i> Notificações</a></li>
+            <li><a href="avisos.php"><i class="fas fa-bell"></i> Avisos </a></li>
             <li><a href="logout.php" id="sair-btn" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
         </ul>
     </div>
@@ -58,12 +75,17 @@ $conn->close();
 
 <main class="conteudo-principal">
     <div class="card-perfil">
+
         <div class="foto-aluno">
-            <img src="https://via.placeholder.com/120" alt="Foto do Aluno">
-            <div class="badge-foto">
-                <i class="fas fa-check-circle"></i>
-            </div>
-        </div>
+          <img src="<?= $aluno['foto'] ? $aluno['foto'] : 'https://via.placeholder.com/120' ?>" alt="Foto do Aluno">
+
+    <form action="upload_foto.php" method="POST" enctype="multipart/form-data">
+        <label class="btn-upload-foto">
+            <i class="fas fa-camera"></i> Alterar foto
+            <input type="file" name="foto" accept="image/*" onchange="this.form.submit()">
+        </label>
+    </form>
+</div>
 
         <div class="dados-aluno">
             <h2 id="nome-perfil"><?= $aluno['nome'] ?></h2>
@@ -86,7 +108,7 @@ $conn->close();
             </div>
             <div class="item-info">
                 <label>Data de Inscrição</label>
-                <p id="data-inscricao"><?= date("d \de F \de Y", strtotime($aluno['data_inscricao'])) ?></p>
+                <p id="data-inscricao"><?= date('d \d\e F \d\e Y', strtotime($aluno['data_inscricao'])) ?></p>
             </div>
             <div class="item-info">
                 <label>Nível</label>
@@ -96,38 +118,44 @@ $conn->close();
     </section>
 
     <section class="secao-documentos">
-        <h3>Documentos</h3>
-        <div class="lista-documentos">
-            <div class="item-documento">
-                <i class="fas fa-file-pdf"></i>
-                <div class="info-doc">
-                    <p>Carteira Digital</p>
-                    <span>PDF • 2.5 MB</span>
-                </div>
-                <a href="#" class="btn-download"><i class="fas fa-download"></i></a>
+         <h3>Últimos Acessos</h3>
+      <div id="timeline-acessos" class="timeline-acessos">
+        <?php if (empty($ultimos_acessos)): ?>
+          <div class="item-timeline">
+            <div class="ponto-timeline"></div>
+            <div class="conteudo-timeline">
+              <p class="horario-acesso">Nenhum acesso registrado ainda</p>
             </div>
-
-            <div class="item-documento">
-                <i class="fas fa-certificate"></i>
-                <div class="info-doc">
-                    <p>Certificado de Frequência</p>
-                    <span>PDF • 1.8 MB</span>
-                </div>
-                <a href="#" class="btn-download"><i class="fas fa-download"></i></a>
+          </div>
+        <?php else: ?>
+          <?php foreach ($ultimos_acessos as $acesso): ?>
+          <div class="item-timeline">
+            <div class="ponto-timeline"></div>
+            <div class="conteudo-timeline">
+              <p class="horario-acesso">
+                <strong>Entrada:</strong> 
+                <?php echo date('d/m/Y H:i', strtotime($acesso['data_entrada'])); ?>
+              </p>
+              <?php if ($acesso['data_saida']): ?>
+              <p class="horario-acesso">
+                <strong>Saída:</strong> 
+                <?php echo date('d/m/Y H:i', strtotime($acesso['data_saida'])); ?>
+              </p>
+              <?php else: ?>
+              <p style="color: #28a745; font-weight: 600;">
+                <strong>Status:</strong> Dentro da escola
+              </p>
+              <?php endif; ?>
             </div>
-        </div>
+          </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
     </section>
 
     <section class="secao-configuracoes">
         <h3>Configurações</h3>
         <div class="lista-config">
-            <div class="item-config">
-                <div class="info-config">
-                    <p>Notificações por Email</p>
-                    <span>Receba atualizações no seu email</span>
-                </div>
-                <input type="checkbox" id="notif-email" checked>
-            </div>
 
             <div class="item-config">
                 <div class="info-config">
@@ -141,9 +169,25 @@ $conn->close();
 </main>
 
 <footer class="rodape">
-    <p>&copy; 2025 Carteirinha Digital SENAI. Todos os direitos reservados.</p>
+    <div class="rodape-container">
+
+        <nav class="rodape-links">
+            <a href="https://github.com/LuizaCubines/carteirinhaDigital.git" target="_blank">GitHub</a>
+            <a href="https://sesisenaispedu-my.sharepoint.com/:w:/g/personal/luiza_cubines2_senaisp_edu_br/IQBfLng_UpdOT4rbqF4QnXd9AYTZB3-n6QJgW-jmCik7amc?e=6t0jpt">Documentação</a>
+        </nav>
+
+        <p class="rodape-copy">
+            © 2025 Carteirinha Digital SENAI — Todos os direitos reservados.
+        </p>
+
+        <p class="rodape-creditos">
+            <span class="icon-codigo"></span> Desenvolvido por <strong>EGLA Squad</strong>
+        </p>
+
+    </div>
 </footer>
 
 
+<script src="js/modo-escuro.js"></script>
 </body>
 </html>
